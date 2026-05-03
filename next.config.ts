@@ -1,10 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  experimental: {
-    serverComponentsExternalPackages: [],
-  },
+  serverExternalPackages: [
+    "@prisma/adapter-better-sqlite3",
+    "@prisma/client",
+    "better-sqlite3",
+    "geoip-lite",
+  ],
 };
 
 export default nextConfig;

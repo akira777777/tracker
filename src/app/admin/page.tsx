@@ -1,6 +1,7 @@
 import { BarChart3, ExternalLink, LogOut, Pause, Play, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { toggleCampaignAction } from "@/app/admin/actions";
+import { AdminLogStream } from "@/components/admin-log-stream";
 import { logoutAction } from "@/app/login/actions";
 import { CampaignForm } from "@/components/campaign-form";
 import { CopyLink } from "@/components/copy-link";
@@ -262,6 +263,8 @@ export default async function AdminPage() {
             </div>
           </div>
         </section>
+
+        <AdminLogStream />
       </div>
     </main>
   );

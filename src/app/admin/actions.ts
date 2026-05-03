@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createCampaign } from "@/lib/campaigns";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { emitSecureLog } from "@/lib/secure-logger";
 import { campaignSchema } from "@/lib/validation";
 
 export type CampaignFormState = {
@@ -25,6 +26,14 @@ export async function createCampaignAction(
   });
 
   if (!parsed.success) {
+    emitSecureLog({
+      severity: "warn",
+      source: "admin/actions",
+      message: "Invalid campaign form rejected",
+      activityType: "user",
+      metadata: { issues: parsed.error.issues.map((issue) => issue.message) },
+    });
+
     return {
       status: "error",
       message: parsed.error.issues[0]?.message ?? "Campaign data is invalid.",
@@ -32,7 +41,14 @@ export async function createCampaignAction(
   }
 
   try {
-    await createCampaign(parsed.data);
+    const campaign = await createCampaign(parsed.data);
+    emitSecureLog({
+      severity: "info",
+      source: "admin/actions",
+      message: "Campaign created by admin",
+      activityType: "user",
+      metadata: { campaignId: campaign.id, slug: campaign.slug },
+    });
     revalidatePath("/admin");
 
     return {
@@ -40,6 +56,13 @@ export async function createCampaignAction(
       message: "Campaign created.",
     };
   } catch (error) {
+    emitSecureLog({
+      severity: "error",
+      source: "admin/actions",
+      message: error instanceof Error ? error.message : "Campaign could not be created",
+      activityType: "error",
+    });
+
     return {
       status: "error",
       message: error instanceof Error ? error.message : "Campaign could not be created.",
@@ -56,12 +79,28 @@ export async function toggleCampaignAction(id: string) {
   });
 
   if (!campaign) {
+    emitSecureLog({
+      severity: "warn",
+      source: "admin/actions",
+      message: "Campaign toggle requested for missing campaign",
+      activityType: "user",
+      metadata: { campaignId: id },
+    });
+
     return;
   }
 
   await prisma.campaign.update({
     where: { id },
     data: { isActive: !campaign.isActive },
+  });
+
+  emitSecureLog({
+    severity: "info",
+    source: "admin/actions",
+    message: "Campaign status toggled by admin",
+    activityType: "user",
+    metadata: { campaignId: id, isActive: !campaign.isActive },
   });
 
   revalidatePath("/admin");

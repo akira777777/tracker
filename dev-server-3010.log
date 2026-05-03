@@ -1,0 +1,21 @@
+
+> tracker@0.1.0 dev
+> next dev --port 3010
+
+▲ Next.js 16.2.4 (Turbopack)
+- Local:         http://localhost:3010
+- Network:       http://192.168.0.186:3010
+- Environments: .env.local, .env
+✓ Ready in 304ms
+Creating turbopack project { dir: 'C:\\Users\\fear7\\Desktop\\tracker', testMode: true }
+
+ GET / 307 in 287ms (next.js: 158ms, application-code: 129ms)
+ GET /admin 307 in 221ms (next.js: 68ms, application-code: 153ms)
+ GET /login 200 in 80ms (next.js: 26ms, application-code: 54ms)
+ POST /login 303 in 22ms (next.js: 4ms, application-code: 18ms)
+ GET /login?error=1 200 in 46ms (next.js: 3ms, application-code: 43ms)
+ POST /login?error=1 303 in 7ms (next.js: 2ms, application-code: 5ms)
+ GET /login?error=1 200 in 35ms (next.js: 2ms, application-code: 33ms)
+  Reload env: .env
+ GET /login?error=1 200 in 91ms (next.js: 27ms, application-code: 64ms)
+ GET /login?error=1 200 in 32ms (next.js: 2ms, application-code: 30ms)

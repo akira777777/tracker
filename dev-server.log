@@ -10,3 +10,11 @@
 Creating turbopack project { dir: 'C:\\Users\\fear7\\Desktop\\tracker', testMode: true }
 
  GET /login 200 in 600ms (next.js: 492ms, application-code: 108ms)
+ GET /login 200 in 40ms (next.js: 3ms, application-code: 37ms)
+ GET /login?error=1 200 in 28ms (next.js: 3ms, application-code: 25ms)
+ POST /login 303 in 51ms (next.js: 3ms, application-code: 48ms)
+  └─ ƒ loginAction({}) in 1ms src/app/login/actions.ts
+ GET /login?error=1 200 in 25ms (next.js: 2ms, application-code: 22ms)
+ POST /login?error=1 303 in 37ms (next.js: 3ms, application-code: 34ms)
+  └─ ƒ loginAction({}) in 0ms src/app/login/actions.ts
+[?25h

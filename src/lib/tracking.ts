@@ -81,7 +81,8 @@ export function summarizeUserAgent(userAgent: string | null) {
     browser: browserLabel || undefined,
     os: osLabel || undefined,
     device: deviceLabel || "Desktop",
-    userAgentSummary: [browserLabel, osLabel, deviceLabel || "Desktop"].filter(Boolean).join(" / ") || undefined,
+    userAgentSummary:
+      [browserLabel, osLabel, deviceLabel || "Desktop"].filter(Boolean).join(" / ") || undefined,
   };
 }
 
@@ -120,7 +121,11 @@ function normalizeIp(value: string | null | undefined) {
     return null;
   }
 
-  const cleaned = value.trim().replace(/^\[/, "").replace(/\]$/, "").replace(/^::ffff:/i, "");
+  const cleaned = value
+    .trim()
+    .replace(/^\[/, "")
+    .replace(/\]$/, "")
+    .replace(/^::ffff:/i, "");
 
   if (!cleaned || cleaned === "unknown") {
     return null;

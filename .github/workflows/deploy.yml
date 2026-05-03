@@ -1,0 +1,65 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: Docker image tag to build and deploy
+        required: true
+        default: latest
+
+jobs:
+  docker-vps:
+    name: Docker VPS deploy template
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: tracker
+      IMAGE_TAG: ${{ inputs.image_tag }}
+    steps:
+      - name: Validate required secrets
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_APP_DIR: ${{ secrets.VPS_APP_DIR }}
+        run: |
+          test -n "$VPS_HOST" || (echo "Missing VPS_HOST secret" && exit 1)
+          test -n "$VPS_USER" || (echo "Missing VPS_USER secret" && exit 1)
+          test -n "$VPS_SSH_KEY" || (echo "Missing VPS_SSH_KEY secret" && exit 1)
+          test -n "$VPS_APP_DIR" || (echo "Missing VPS_APP_DIR secret" && exit 1)
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build --pull -t "$IMAGE_NAME:$IMAGE_TAG" .
+
+      - name: Save Docker image
+        run: docker save "$IMAGE_NAME:$IMAGE_TAG" | gzip > image.tar.gz
+
+      - name: Configure SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts
+
+      - name: Upload deployment files
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_APP_DIR: ${{ secrets.VPS_APP_DIR }}
+        run: |
+          ssh "$VPS_USER@$VPS_HOST" "mkdir -p '$VPS_APP_DIR'"
+          scp image.tar.gz docker-compose.yml "$VPS_USER@$VPS_HOST:$VPS_APP_DIR/"
+
+      - name: Load image and restart service
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_APP_DIR: ${{ secrets.VPS_APP_DIR }}
+        run: |
+          ssh "$VPS_USER@$VPS_HOST" "cd '$VPS_APP_DIR' && docker load < image.tar.gz && IMAGE_TAG='$IMAGE_TAG' docker compose up -d"

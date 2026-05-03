@@ -75,9 +75,7 @@ export function CampaignForm() {
         {state.message ? (
           <p
             className={
-              state.status === "error"
-                ? "text-sm text-red-700"
-                : "text-sm text-emerald-700"
+              state.status === "error" ? "text-sm text-red-700" : "text-sm text-emerald-700"
             }
           >
             {state.message}

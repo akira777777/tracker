@@ -39,6 +39,8 @@ yarn-error.log*
 *.db-journal
 *.sqlite
 *.sqlite3
+/data/
+/docker-data/
 
 # local browser diagnostics
 .playwright-mcp/

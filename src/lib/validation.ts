@@ -18,7 +18,10 @@ export const campaignSchema = z.object({
     .string()
     .trim()
     .url("Enter a valid URL.")
-    .refine((value) => ["http:", "https:"].includes(new URL(value).protocol), "Only HTTP and HTTPS URLs are allowed."),
+    .refine(
+      (value) => ["http:", "https:"].includes(new URL(value).protocol),
+      "Only HTTP and HTTPS URLs are allowed.",
+    ),
   description: z
     .string()
     .trim()

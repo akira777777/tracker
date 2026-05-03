@@ -5,11 +5,7 @@ import { prisma } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
-export default async function TrackingPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function TrackingPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const campaign = await prisma.campaign.findUnique({
     where: { slug },
@@ -29,7 +25,8 @@ export default async function TrackingPage({
           <p className="text-sm text-zinc-500">Переход по ссылке</p>
           <h1 className="mt-2 text-2xl font-semibold tracking-normal">{campaign.name}</h1>
           <p className="mt-3 text-sm leading-6 text-zinc-600">
-            Вы будете перенаправлены на <span className="font-medium text-zinc-950">{getHost(campaign.targetUrl)}</span>.
+            Вы будете перенаправлены на{" "}
+            <span className="font-medium text-zinc-950">{getHost(campaign.targetUrl)}</span>.
           </p>
 
           <form action="/api/events" method="post" className="mt-6">
@@ -45,8 +42,8 @@ export default async function TrackingPage({
       <footer className="mx-auto flex w-full max-w-xl items-start gap-2 pb-2 text-[12px] leading-5 text-zinc-500">
         <ShieldCheck aria-hidden className="mt-0.5 shrink-0 text-emerald-700" size={14} />
         <p>
-          Мы используем базовую аналитику переходов: время, примерное местоположение и
-          технические данные браузера.{" "}
+          Мы используем базовую аналитику переходов: время, примерное местоположение и технические
+          данные браузера.{" "}
           <Link href="/privacy" className="font-medium text-zinc-700 underline underline-offset-2">
             Подробнее
           </Link>

@@ -19,48 +19,45 @@ export default async function AdminPage() {
   const cutoff = getRetentionCutoff();
   const retentionDays = getRetentionDays();
 
-  const [campaigns, campaignCounts, countryCounts, recentEvents, totalEvents] =
-    await Promise.all([
-      prisma.campaign.findMany({
-        orderBy: { createdAt: "desc" },
-      }),
-      prisma.clickEvent.groupBy({
-        by: ["campaignId"],
-        where: { createdAt: { gte: cutoff } },
-        _count: { _all: true },
-      }),
-      prisma.clickEvent.groupBy({
-        by: ["country"],
-        where: {
-          createdAt: { gte: cutoff },
-          country: { not: null },
-        },
-        _count: { _all: true },
-      }),
-      prisma.clickEvent.findMany({
-        where: { createdAt: { gte: cutoff } },
-        include: {
-          campaign: {
-            select: {
-              name: true,
-              slug: true,
-            },
+  const [campaigns, campaignCounts, countryCounts, recentEvents, totalEvents] = await Promise.all([
+    prisma.campaign.findMany({
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.clickEvent.groupBy({
+      by: ["campaignId"],
+      where: { createdAt: { gte: cutoff } },
+      _count: { _all: true },
+    }),
+    prisma.clickEvent.groupBy({
+      by: ["country"],
+      where: {
+        createdAt: { gte: cutoff },
+        country: { not: null },
+      },
+      _count: { _all: true },
+    }),
+    prisma.clickEvent.findMany({
+      where: { createdAt: { gte: cutoff } },
+      include: {
+        campaign: {
+          select: {
+            name: true,
+            slug: true,
           },
         },
-        orderBy: { createdAt: "desc" },
-        take: 12,
-      }),
-      prisma.clickEvent.count({
-        where: { createdAt: { gte: cutoff } },
-      }),
-    ]);
+      },
+      orderBy: { createdAt: "desc" },
+      take: 12,
+    }),
+    prisma.clickEvent.count({
+      where: { createdAt: { gte: cutoff } },
+    }),
+  ]);
 
   const countsByCampaign = new Map(
     campaignCounts.map((item) => [item.campaignId, item._count._all]),
   );
-  const topCountries = countryCounts
-    .sort((a, b) => b._count._all - a._count._all)
-    .slice(0, 8);
+  const topCountries = countryCounts.sort((a, b) => b._count._all - a._count._all).slice(0, 8);
   const activeCampaigns = campaigns.filter((campaign) => campaign.isActive).length;
 
   return (
@@ -93,8 +90,16 @@ export default async function AdminPage() {
 
       <div className="mx-auto grid max-w-7xl gap-6 px-5 py-6">
         <section className="grid gap-4 md:grid-cols-3">
-          <Metric label="Кампании" value={campaigns.length.toString()} detail={`${activeCampaigns} active`} />
-          <Metric label="Переходы" value={totalEvents.toString()} detail={`за ${retentionDays} дней`} />
+          <Metric
+            label="Кампании"
+            value={campaigns.length.toString()}
+            detail={`${activeCampaigns} active`}
+          />
+          <Metric
+            label="Переходы"
+            value={totalEvents.toString()}
+            detail={`за ${retentionDays} дней`}
+          />
           <Metric label="Гео" value={topCountries.length.toString()} detail="страны в событиях" />
         </section>
 
@@ -137,7 +142,9 @@ export default async function AdminPage() {
                           <td className="px-5 py-4">
                             <div className="font-medium text-zinc-950">{campaign.name}</div>
                             {campaign.description ? (
-                              <div className="mt-1 max-w-xs text-xs text-zinc-500">{campaign.description}</div>
+                              <div className="mt-1 max-w-xs text-xs text-zinc-500">
+                                {campaign.description}
+                              </div>
                             ) : null}
                             <a
                               href={campaign.targetUrl}
@@ -183,7 +190,11 @@ export default async function AdminPage() {
                           <td className="px-5 py-4">
                             <form action={toggleCampaign}>
                               <button className="inline-flex h-8 items-center gap-2 rounded-md border border-zinc-300 px-3 text-xs font-medium text-zinc-700 transition hover:border-zinc-500 hover:text-zinc-950">
-                                {campaign.isActive ? <Pause aria-hidden size={14} /> : <Play aria-hidden size={14} />}
+                                {campaign.isActive ? (
+                                  <Pause aria-hidden size={14} />
+                                ) : (
+                                  <Play aria-hidden size={14} />
+                                )}
                                 {campaign.isActive ? "Пауза" : "Включить"}
                               </button>
                             </form>
@@ -210,13 +221,18 @@ export default async function AdminPage() {
             <div className="mt-4 grid gap-2">
               {topCountries.length ? (
                 topCountries.map((item) => (
-                  <div key={item.country} className="flex items-center justify-between rounded-md bg-zinc-50 px-3 py-2">
+                  <div
+                    key={item.country}
+                    className="flex items-center justify-between rounded-md bg-zinc-50 px-3 py-2"
+                  >
                     <span className="text-sm text-zinc-700">{item.country}</span>
                     <span className="text-sm font-medium text-zinc-950">{item._count._all}</span>
                   </div>
                 ))
               ) : (
-                <p className="text-sm text-zinc-500">Геоданные появятся после переходов с публичных IP.</p>
+                <p className="text-sm text-zinc-500">
+                  Геоданные появятся после переходов с публичных IP.
+                </p>
               )}
             </div>
           </div>
@@ -232,9 +248,12 @@ export default async function AdminPage() {
                       <time className="text-xs text-zinc-500">{formatDate(event.createdAt)}</time>
                     </div>
                     <p className="mt-1 text-xs text-zinc-500">
-                      {[event.city, event.region, event.country].filter(Boolean).join(", ") || "Geo unavailable"}
+                      {[event.city, event.region, event.country].filter(Boolean).join(", ") ||
+                        "Geo unavailable"}
                     </p>
-                    <p className="mt-1 text-xs text-zinc-500">{event.userAgentSummary || "Browser unavailable"}</p>
+                    <p className="mt-1 text-xs text-zinc-500">
+                      {event.userAgentSummary || "Browser unavailable"}
+                    </p>
                   </div>
                 ))
               ) : (

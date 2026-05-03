@@ -78,7 +78,9 @@ function verifySession(value: string | undefined) {
   }
 
   try {
-    const payload = JSON.parse(Buffer.from(encoded, "base64url").toString("utf8")) as SessionPayload;
+    const payload = JSON.parse(
+      Buffer.from(encoded, "base64url").toString("utf8"),
+    ) as SessionPayload;
     return payload.sub === "admin" && payload.exp > Math.floor(Date.now() / 1000);
   } catch {
     return false;

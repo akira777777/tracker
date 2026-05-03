@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Campaign {
+  id          String       @id @default(cuid())
+  name        String
+  slug        String       @unique
+  targetUrl   String
+  description String?
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  events      ClickEvent[]
+
+  @@index([createdAt])
+}
+
+model ClickEvent {
+  id               String   @id @default(cuid())
+  campaignId       String
+  campaign         Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  consentVersion   String
+  ipHash           String?
+  ipTruncated      String?
+  country          String?
+  region           String?
+  city             String?
+  timezone         String?
+  browser          String?
+  os               String?
+  device           String?
+  userAgentSummary String?
+  referrer         String?
+  createdAt        DateTime @default(now())
+
+  @@index([campaignId, createdAt])
+  @@index([createdAt])
+}
